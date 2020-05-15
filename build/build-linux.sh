@@ -1,2 +1,2 @@
-g++ -O2 -I/home/marcel/Documents/libs/eigen -I/home/marcel/Documents/libs/MiniDNN/include main.cpp
+g++ -O2 -I/home/marcel/Documents/libs/eigen -I/home/marcel/Documents/libs/MiniDNN/include ../main.cpp -o ./bin/dnnLinux
 
