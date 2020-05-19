@@ -1,57 +1,106 @@
 #include <MiniDNN.h>
-
+#include <fstream>
+#include <iostream>
 using namespace MiniDNN;
 
 typedef Eigen::MatrixXd Matrix;
 typedef Eigen::VectorXd Vector;
 
+
+
 int main()
 {
-    // Set random seed and generate some data
-    std::srand(123);
-    // Predictors -- each column is an observation
-    Matrix x = Matrix::Random(400, 100);
-    // Response variables -- each column is an observation
-    Matrix y = Matrix::Random(2, 100);
+    
+    //Count Cols and rows of input:
+    std::ifstream fin("input.csv");
+    int val = 0, rows = 0, cols = 0, numItems = 0;
 
-    // Construct a network object
-    Network net;
+    while(fin.peek() != '\n' && fin >> val) {
+        std::cout << val << ' ';
+        ++numItems;
+    }
+    cols = numItems;
 
-    // Create three layers
-    // Layer 1 -- convolutional, input size 20x20x1, 3 output channels, filter size 5x5
-    Layer* layer1 = new Convolutional<ReLU>(20, 20, 1, 3, 5, 5);
-    // Layer 2 -- max pooling, input size 16x16x3, pooling window size 3x3
-    Layer* layer2 = new MaxPooling<ReLU>(16, 16, 3, 3, 3);
-    // Layer 3 -- fully connected, input size 5x5x3, output size 2
-    Layer* layer3 = new FullyConnected<Identity>(5 * 5 * 3, 2);
+    std::cout << '\n';
+    while(fin >> val) {
+        ++numItems;
+        std::cout << val << ' ';
+        if(numItems % cols == 0) std::cout << '\n';
+    }
 
-    // Add layers to the network object
-    net.add_layer(layer1);
-    net.add_layer(layer2);
-    net.add_layer(layer3);
+    if(numItems > 0) {
+        rows = numItems/cols;
+        std::cout << "rows = " << rows << ", cols = " << cols << '\n';
+    }
+    else {
+        std::cout << "data reading failed\n";
+    }
+    fin.close();
+    fin.clear();
 
-    // Set output layer
-    net.set_output(new RegressionMSE());
+    //create input Matrix from file:
+    Matrix inputX = Matrix::Zero(rows, cols);
+    fin.open("input.csv");
+    if(fin.is_open()) {
+        for(int row = 0; row < rows; ++row) {
+            for(int col = 0; col < cols; ++col) {
+                double item = 0.0;
+                fin >> item;
+                inputX(row, col) = item;
+            }
+        }
+        fin.close();
+        fin.clear();
+    }
+    std::cout << "Input Matrix = \n";
+    std::cout << inputX << '\n';
+    inputX.transposeInPlace();
+    std::cout << "Transposed Input Matrix: \n";
+    std::cout << inputX << '\n';
 
-    // Create optimizer object
-    RMSProp opt;
-    opt.m_lrate = 0.001;
+    //Count Cols and rows of output:
+    val = 0, rows = 0, cols = 0, numItems = 0;
+    fin.open("output.csv");
+    while(fin.peek() != '\n' && fin >> val) {
+        std::cout << val << ' ';
+        ++numItems;
+    }
+    cols = numItems;
+    std::cout << '\n';
+    while(fin >> val) {
+        ++numItems;
+        std::cout << val << ' ';
+        if(numItems % cols == 0) std::cout << '\n';
+    }
+    if(numItems > 0) {
+        rows = numItems / cols;
+        std::cout << "rows = " << rows << ", cols = " << cols << '\n';
+    }
+    else {
+        std::cout << "output data reading failed\n";
+    }
+    fin.close();
+    fin.clear();
 
-    // (Optional) set callback function object
-    VerboseCallback callback;
-    net.set_callback(callback);
+    //create output Matrix from file:
+    Matrix outputY = Matrix::Zero(rows, cols);
+    fin.open("output.csv");
+    if(fin.is_open()) {
+        for(int row = 0; row < rows; ++row) {
+            for(int col = 0; col < cols; ++col) {
+                double item = 0.0;
+                fin >> item;
+                outputY(row, col) = item;
+            }
+        }
+        fin.close();
+    }
+    std::cout << "Output Matrix = \n";
+    std::cout << outputY << '\n';
+    outputY.transposeInPlace();
+    std::cout << "Transposed Output Matrix = \n";
+    std::cout << outputY << '\n';
 
-    // Initialize parameters with N(0, 0.01^2) using random seed 123
-    net.init(0, 0.01, 123);
-
-    // Fit the model with a batch size of 100, running 10 epochs with random seed 123
-    net.fit(opt, x, y, 100, 10, 123);
-
-    // Obtain prediction -- each column is an observation
-    Matrix pred = net.predict(x);
-
-    // Layer objects will be freed by the network object,
-    // so do not manually delete them
-
+    
     return 0;
 }
