@@ -101,6 +101,49 @@ int main()
     std::cout << "Transposed Output Matrix = \n";
     std::cout << outputY << '\n';
 
+    //Construct a network object
+    Network net;
+    //Create three layers
+    //Layer 1 -- fully connected, input = input size of Matrix
+    Layer* layer1 = new FullyConnected<Identity>(10, 20);
+    Layer* layer2 = new FullyConnected<Tanh>(20, 10);
+    Layer* layer3 = new FullyConnected<Tanh>(10, 1);
+
+    //Add layers to the network
+    net.add_layer(layer1);
+    net.add_layer(layer2);
+    net.add_layer(layer3);
+
+    //set output layer
+    net.set_output(new RegressionMSE());
+    //Create optimizer object
+    RMSProp opt;
+    opt.m_lrate = 0.001;
+    //set callback function object (output learning metrics)
+    VerboseCallback callback;
+    net.set_callback(callback);
+    //Initialize parameters with N(0, 0.01²) using random seed 872164782164892136
+    net.init(0, 0.01, 872164782164892136);
+    //Fit the model with a batch size of 100, running 10 epochs with random seed 123
+    net.fit(opt, inputX, outputY, 100, 10, 123);
+/*     
+    //Save Model to File for importing later
+    net.export_net("Netfolder", "NetFile");
+    //Create new Network with file
+    Network netFromFile;
+    //Read structure and parameters from file
+    netFromFile.read_net("./NetFolder/", "NetFile");
+    //Obtain prediction -- each column is an observation
+    std::cout << net.predict(inputX) << '\n';
+    std::cout << netFromFile.predict(inputX) - net.predict(inputX) << '\n';
+     */
+
+    //Obtain prediction -- each column is an observation
+    Matrix pred = net.predict(inputX);
+    std::cout << net.predict(inputX) << '\n';
     
+    // Layer objects will be freed by the network object,
+    // so do not manually delete them
+
     return 0;
 }
