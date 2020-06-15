@@ -16,7 +16,7 @@ M load_csv (const std::string & path) {
     indata.open(path);
     std::string line;
     std::vector<double> values;
-    uint rows = 0;
+    unsigned int rows = 0;
     while (std::getline(indata, line)) {
         std::stringstream lineStream(line);
         std::string cell;
@@ -32,65 +32,40 @@ M load_csv (const std::string & path) {
 int main()
 {
     
-    Matrix A = load_csv<Matrix>("input.csv");
-    std::cout << "Rows: " << A.rows() << " Cols: " << A.cols() << '\n';
-
-
-
-    //Count Cols and rows of input:
-    std::ifstream fin("input.csv");
-    double val = 0;
-    int rows = 0, cols = 0, numItems = 0;
-
-    while(fin.peek() != '\n' && fin >> val) {
-        std::cout << val << ' ';
-        ++numItems;
-    }
-    cols = numItems;
-
-    std::cout << '\n';
-    while(fin >> val) {
-        ++numItems;
-        std::cout << val << ' ';
-        if(numItems % cols == 0) std::cout << '\n';
-    }
-
-    if(numItems > 0) {
-        rows = numItems/cols;
-        std::cout << "rows = " << rows << ", cols = " << cols << '\n';
-    }
-    else {
-        std::cout << "inputdata reading failed\n";
-    }
-    fin.close();
-    fin.clear();
-
     //create input Matrix from file:
-    Matrix inputX = Matrix::Zero(rows, cols);
-    fin.open("input.csv");
-    if(fin.is_open()) {
-        for(int row = 0; row < rows; ++row) {
-            for(int col = 0; col < cols; ++col) {
-                double item = 0.0;
-                fin >> item;
-                inputX(row, col) = item;
-            }
+    Matrix inputMx = load_csv<Matrix>("input.csv");
+    std::cout << "Rows: " << inputMx.rows() << " Cols: " << inputMx.cols() << '\n';
+
+    std::cout << "First 2 rows of Input Matrix = \n";
+    for (int i(0); i < 2; ++i) {
+        for (int j(0); j < inputMx.cols(); ++j) {
+            std::cout << inputMx(i, j) << ' ';
         }
-        fin.close();
-        fin.clear();
+        std::cout << '\n';
     }
-    std::cout << "Input Matrix = \n";
-    std::cout << inputX << '\n';
-    inputX.transposeInPlace();
-    std::cout << "Transposed Input Matrix: \n";
-    std::cout << inputX << '\n';
+
+    inputMx.transposeInPlace();
+    std::cout << "First 2 columns of Transposed Input Matrix: \n";
+    for (int i(0); i < inputMx.rows(); ++i) {
+        for (int j(0); j < 2; ++j) {
+            std::cout << inputMx(i, j) << ' ';
+        }
+        std::cout << '\n';
+    }    
     
-    //normalize data
-    for(int i(0); i < inputX.cols(); ++i) {
-        inputX.col(i).normalize();
+    std::cout << "Rows: " << inputMx.rows() << " Cols: " << inputMx.cols() << '\n';
+
+    //normalize inputdata
+    for(int i(0); i < inputMx.rows(); ++i) {
+        inputMx.row(i).normalize();
     }
-//    std::cout << "Normalized Output Matrix: \n";
-//    std::cout << inputX << '\n';
+    std::cout << "First 2 columns of the Normalized Output Matrix: \n";
+    for (int i(0); i < inputMx.rows(); ++i) {
+        for (int j(0); j < 2; ++j) {
+            std::cout << inputMx(i, j) << ' ';
+        }
+        std::cout << '\n';
+    }   
 
     //shuffle the data:
     //create random seeds
@@ -100,67 +75,47 @@ int main()
     std::mt19937 eng1(rng_seed);
     auto eng2 = eng1;
     //create permutation Matrix
-    Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> permX(inputX.cols());
+    Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> permX(inputMx.cols());
     permX.setIdentity();
     std::shuffle(permX.indices().data(), permX.indices().data()+permX.indices().size(), eng1);
-    inputX = inputX * permX;
+    inputMx = inputMx * permX;
 //    std::cout << "shuffled columns Matrix: \n";
 //    std::cout << inputX << '\n';
 
-    //Count Cols and rows of output:
-    val = 0, rows = 0, cols = 0, numItems = 0;
-    fin.open("output.csv");
-    while(fin.peek() != '\n' && fin >> val) {
-        std::cout << val << ' ';
-        ++numItems;
-    }
-    cols = numItems;
-    std::cout << '\n';
-    while(fin >> val) {
-        ++numItems;
-        std::cout << val << ' ';
-        if(numItems % cols == 0) std::cout << '\n';
-    }
-    if(numItems > 0) {
-        rows = numItems / cols;
-        std::cout << "rows = " << rows << ", cols = " << cols << '\n';
-    }
-    else {
-        std::cout << "outputdata reading failed\n";
-    }
-    fin.close();
-    fin.clear();
+    //create output Matrix from file
+    Matrix outputMx = load_csv<Matrix>("output.csv");
+    std::cout << "Rows: " << outputMx.rows() << " Cols: " << outputMx.cols() << '\n';
 
-    //create output Matrix from file:
-    Matrix outputY = Matrix::Zero(rows, cols);
-    fin.open("output.csv");
-    if(fin.is_open()) {
-        for(int row = 0; row < rows; ++row) {
-            for(int col = 0; col < cols; ++col) {
-                double item = 0.0;
-                fin >> item;
-                outputY(row, col) = item;
-            }
+    std::cout << "First 2 rows of Output Matrix = \n";
+    for (int i(0); i < 2; ++i) {
+        for (int j(0); j < outputMx.cols(); ++j) {
+            std::cout << outputMx(i, j) << ' ';
         }
-        fin.close();
+        std::cout << '\n';
     }
-    std::cout << "Output Matrix = \n";
-    std::cout << outputY << '\n';
-    outputY.transposeInPlace();
-    std::cout << "Transposed Output Matrix = \n";
-    std::cout << outputY << '\n';
+
+    outputMx.transposeInPlace();
+    std::cout << "First 2 columns of Transposed Output Matrix: \n";
+    for (int i(0); i < outputMx.rows(); ++i) {
+        for (int j(0); j < 2; ++j) {
+            std::cout << outputMx(i, j) << ' ';
+        }
+        std::cout << '\n';
+    }    
+    
+    std::cout << "Rows: " << outputMx.rows() << " Cols: " << outputMx.cols() << '\n';
 
     //create permutation Matrix
-    Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> permY(outputY.cols());
+    Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> permY(outputMx.cols());
     permY.setIdentity();
     std::shuffle(permY.indices().data(), permY.indices().data()+permY.indices().size(), eng2);
-    outputY = outputY * permY;
+    outputMx = outputMx * permY;
 //    std::cout << "shuffled columns Matrix: \n";
 //    std::cout << outputY << '\n';
     
-    //normalize data
-    for(int i(0); i< outputY.cols(); ++i) {
-        outputY.col(i).normalize();
+    //normalize outputdata
+    for(int i(0); i< outputMx.rows(); ++i) {
+        outputMx.row(i).normalize();
     }
 //    std::cout << "Normalized Output Matrix: \n";
 //    std::cout << outputY << '\n';
@@ -184,9 +139,9 @@ int main()
     Network net;
     //Create three layers
     //Layer 1 -- fully connected, input = input size of Matrix
-    Layer* layer1 = new FullyConnected<Tanh>(inputX.rows(), 8);
+    Layer* layer1 = new FullyConnected<Tanh>(inputMx.rows(), 8);
     Layer* layer2 = new FullyConnected<Tanh>(8, 4);
-    Layer* layer3 = new FullyConnected<Identity>(4, outputY.rows());
+    Layer* layer3 = new FullyConnected<Identity>(4, outputMx.rows());
 
     //Add layers to the network
     net.add_layer(layer1);
@@ -204,7 +159,7 @@ int main()
     //Initialize parameters with N(0, 0.01²) using random seed 87892136
     net.init(0, 0.01, 87892136);
     //Fit the model with a batch size of 10, running 1000 epochs with random seed 123456
-    net.fit(opt, inputX, outputY, 20, 1000, 123456);
+    net.fit(opt, inputMx, outputMx, 20, 1000, 123456);
 //     
     //Save Model to File for importing later
 //    net.export_net("Netfolder", "NetFile");
