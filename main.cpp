@@ -3,19 +3,44 @@
 #include <iostream>         
 #include <algorithm>        //shuffle
 #include <random>           //seed generation
+#include <vector>           //std::vector
 using namespace MiniDNN;
 
 typedef Eigen::MatrixXd Matrix;
 typedef Eigen::VectorXd Vector;
 
+//read from csv and return a eigen Matrix
+template<typename M>
+M load_csv (const std::string & path) {
+    std::ifstream indata;
+    indata.open(path);
+    std::string line;
+    std::vector<double> values;
+    uint rows = 0;
+    while (std::getline(indata, line)) {
+        std::stringstream lineStream(line);
+        std::string cell;
+        while (std::getline(lineStream, cell, ',')) {
+            values.push_back(std::stod(cell));
+        }
+        ++rows;
+    }
+    return Eigen::Map<const Eigen::Matrix<typename M::Scalar, M::RowsAtCompileTime, M::ColsAtCompileTime, Eigen::RowMajor>>(values.data(), rows, values.size()/rows);
+}
 
 
 int main()
 {
     
+    Matrix A = load_csv<Matrix>("input.csv");
+    std::cout << "Rows: " << A.rows() << " Cols: " << A.cols() << '\n';
+
+
+
     //Count Cols and rows of input:
     std::ifstream fin("input.csv");
-    int val = 0, rows = 0, cols = 0, numItems = 0;
+    double val = 0;
+    int rows = 0, cols = 0, numItems = 0;
 
     while(fin.peek() != '\n' && fin >> val) {
         std::cout << val << ' ';
@@ -35,7 +60,7 @@ int main()
         std::cout << "rows = " << rows << ", cols = " << cols << '\n';
     }
     else {
-        std::cout << "data reading failed\n";
+        std::cout << "inputdata reading failed\n";
     }
     fin.close();
     fin.clear();
@@ -59,14 +84,14 @@ int main()
     inputX.transposeInPlace();
     std::cout << "Transposed Input Matrix: \n";
     std::cout << inputX << '\n';
-    /*
+    
     //normalize data
     for(int i(0); i < inputX.cols(); ++i) {
         inputX.col(i).normalize();
     }
-    std::cout << "Normalized Output Matrix: \n";
-    std::cout << inputX << '\n';
-*/
+//    std::cout << "Normalized Output Matrix: \n";
+//    std::cout << inputX << '\n';
+
     //shuffle the data:
     //create random seeds
     std::random_device r;
@@ -79,8 +104,8 @@ int main()
     permX.setIdentity();
     std::shuffle(permX.indices().data(), permX.indices().data()+permX.indices().size(), eng1);
     inputX = inputX * permX;
-    std::cout << "shuffled columns Matrix: \n";
-    std::cout << inputX << '\n';
+//    std::cout << "shuffled columns Matrix: \n";
+//    std::cout << inputX << '\n';
 
     //Count Cols and rows of output:
     val = 0, rows = 0, cols = 0, numItems = 0;
@@ -101,7 +126,7 @@ int main()
         std::cout << "rows = " << rows << ", cols = " << cols << '\n';
     }
     else {
-        std::cout << "output data reading failed\n";
+        std::cout << "outputdata reading failed\n";
     }
     fin.close();
     fin.clear();
@@ -130,16 +155,16 @@ int main()
     permY.setIdentity();
     std::shuffle(permY.indices().data(), permY.indices().data()+permY.indices().size(), eng2);
     outputY = outputY * permY;
-    std::cout << "shuffled columns Matrix: \n";
-    std::cout << outputY << '\n';
-    /*
+//    std::cout << "shuffled columns Matrix: \n";
+//    std::cout << outputY << '\n';
+    
     //normalize data
     for(int i(0); i< outputY.cols(); ++i) {
         outputY.col(i).normalize();
     }
-    std::cout << "Normalized Output Matrix: \n";
-    std::cout << outputY << '\n';
-    */
+//    std::cout << "Normalized Output Matrix: \n";
+//    std::cout << outputY << '\n';
+    
    /* //test normalize with initialized matrix
     Eigen::Matrix<double, 7, 3> A = (Eigen::Matrix<double, 7, 3>() << 
     1, 2, 3,
@@ -159,9 +184,9 @@ int main()
     Network net;
     //Create three layers
     //Layer 1 -- fully connected, input = input size of Matrix
-    Layer* layer1 = new FullyConnected<Identity>(inputX.rows(), 20);
-    Layer* layer2 = new FullyConnected<Tanh>(20, 10);
-    Layer* layer3 = new FullyConnected<Tanh>(10, outputY.rows());
+    Layer* layer1 = new FullyConnected<Tanh>(inputX.rows(), 8);
+    Layer* layer2 = new FullyConnected<Tanh>(8, 4);
+    Layer* layer3 = new FullyConnected<Identity>(4, outputY.rows());
 
     //Add layers to the network
     net.add_layer(layer1);
@@ -178,25 +203,25 @@ int main()
     net.set_callback(callback);
     //Initialize parameters with N(0, 0.01²) using random seed 87892136
     net.init(0, 0.01, 87892136);
-    //Fit the model with a batch size of 5, running 8000 epochs with random seed 123456
-    net.fit(opt, inputX, outputY, 5, 8000, 123456);
-/*     
+    //Fit the model with a batch size of 10, running 1000 epochs with random seed 123456
+    net.fit(opt, inputX, outputY, 20, 1000, 123456);
+//     
     //Save Model to File for importing later
-    net.export_net("Netfolder", "NetFile");
+//    net.export_net("Netfolder", "NetFile");
     //Create new Network with file
-    Network netFromFile;
+//    Network netFromFile;
     //Read structure and parameters from file
-    netFromFile.read_net("./NetFolder/", "NetFile");
+//    netFromFile.read_net("./NetFolder/", "NetFile");
     //Obtain prediction -- each column is an observation
-    std::cout << net.predict(inputX) << '\n';
-    std::cout << netFromFile.predict(inputX) - net.predict(inputX) << '\n';
-    */
-
+//    std::cout << net.predict(inputX) << '\n';
+//    std::cout << netFromFile.predict(inputX) - net.predict(inputX) << '\n';
+    //
+/*
     //Obtain prediction -- each column is an observation
     std::cout << "Input: \n" << inputX << '\n';
     Matrix pred = net.predict(inputX);
     std::cout << "Prediction: \n" << net.predict(inputX) << '\n';
-    
+*/    
     // Layer objects will be freed by the network object,
     // so do not manually delete them
 
