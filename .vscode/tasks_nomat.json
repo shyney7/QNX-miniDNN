@@ -5,15 +5,11 @@
             "label": "g++ build active file",
             "command": "/usr/bin/g++",
             "args": [
-                "${file}",
                 "-g",
                 "-O2",
-                "-std=c++11",
-                "-I/home/marcel/Documents/minidnn/QNX-miniDNN/include",
-                "-I/usr/include/python2.7",
-                "-lpython2.7",
                 "-I/home/marcel/Documents/libs/eigen",
                 "-I/home/marcel/Documents/libs/MiniDNN/include",
+                "${file}",
                 "-o",
                 "${fileDirname}/build/bin/dnnLinux"
             ],

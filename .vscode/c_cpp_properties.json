@@ -5,7 +5,9 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/home/marcel/Documents/libs/MiniDNN/include",
-                "/home/marcel/Documents/libs/eigen"
+                "/home/marcel/Documents/libs/eigen",
+                "${workspaceFolder}/include",
+                "/usr/include/python2.7"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

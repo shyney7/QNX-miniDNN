@@ -1,0 +1,1 @@
+g++ ../main.cpp -O2 -std=c++11 -I../include -I/usr/include/python2.7 -lpython2.7 -I/home/marcel/Documents/libs/eigen -I/home/marcel/Documents/libs/MiniDNN/include -o ./bin/dnnLinux
