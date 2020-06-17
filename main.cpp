@@ -31,6 +31,12 @@ M load_csv (const std::string & path) {
     return Eigen::Map<const Eigen::Matrix<typename M::Scalar, M::RowsAtCompileTime, M::ColsAtCompileTime, Eigen::RowMajor>>(values.data(), rows, values.size()/rows);
 }
 
+//test if file exists function
+bool checkfile(const char *filename) {
+    std::ifstream infile(filename);
+    return infile.good();
+}
+
 
 int main()
 {
@@ -189,7 +195,13 @@ int main()
     net.fit(opt, inputMx, outputMx, 30, 100, 123456);
      
     //Save Model to File for importing later
-    //net.export_net("./NetFolder/", "NetFile");
+    if(!checkfile("./NetFolder/NetFile")) {
+        net.export_net("./NetFolder/", "NetFile");
+        std::cout << "Trained network saved to file...\n";
+    }
+    else {
+        std::cout << "Networkfile already exists!\n";
+    }
     //Create new Network with file
 //    Network netFromFile;
     //Read structure and parameters from file
