@@ -247,5 +247,41 @@ int main()
     plt::legend();
     plt::show();
 
+    //plot raw sensor data
+    char userinput;
+    std::cout << "Plot raw sensor data (y/n)?\n";
+    std::cin >> userinput;
+    while (userinput != 'y' && userinput != 'n') {
+        std::cout << "Wrong input type y or n (yes/no)!\n";
+        std::cin.clear();
+        std::cin >> userinput;
+    }
+    if (userinput == 'y') {
+        std::cout << "starting plotting operations...\n";
+
+        std::vector<double> fdDruck, fdTemp, fdVentil, usVentil;
+        fdDruck.reserve(inputMx.cols());
+        fdTemp.reserve(inputMx.cols());
+        fdVentil.reserve(inputMx.cols());
+        usVentil.reserve(inputMx.cols());
+
+        for (int i(0); i < inputMx.cols(); ++i) {
+            fdDruck.push_back(inputMx(0, i));
+            fdTemp.push_back(inputMx(1, i));
+            fdVentil.push_back(inputMx(2, i));
+            usVentil.push_back(inputMx(3, i));
+        }
+        plt::figure_size(1200, 780);
+        plt::named_plot("Leistung", in, out);
+        plt::named_plot("Druck", in, fdDruck);
+        plt::named_plot("Temp", in, fdTemp);
+        plt::named_plot("fdVentil", in, fdVentil);
+        plt::named_plot("usVentil", in, usVentil);
+        plt::title("Leistung Muellverbrennungsanlage");
+        plt::legend();
+        plt::show();
+    }
+    
+
     return 0;
 }
