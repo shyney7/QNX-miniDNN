@@ -237,7 +237,7 @@ int main()
     }
 
 
-
+    //plot raw and prediction data
     std::cout << "Outputvector: \n";
     std::cout << "Size: " << out.size() << " Capacity: " << out.capacity() << '\n';
     plt::figure_size(1200, 780);
@@ -280,6 +280,9 @@ int main()
         plt::title("Leistung Muellverbrennungsanlage");
         plt::legend();
         plt::show();
+    }
+    if (userinput == 'n') {
+        std::cout << "Raw Data plotting negative exiting program...\n";
     }
     
 
