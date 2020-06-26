@@ -92,7 +92,9 @@ int main()
     
     //create Matrix for prediction
     Matrix predinput = inputMx;
-/*
+
+/*  //Shuffling the data is not really necesary, 
+    //because miniDNN already picks random values during the batch training
     //shuffle the data:
     //create random seeds
     std::random_device r;
@@ -288,3 +290,7 @@ int main()
 
     return 0;
 }
+
+//To-do:
+//-Z-Score normalization
+//-train from file
